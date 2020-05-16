@@ -12,7 +12,6 @@ import pygame
 # 3. If there are ==3 live cells near a dead cells, it becomes live
 # ----------
 
-# The grid (?) has a list with alive cells
 # The grid is iterating through every alive cell and does the following:
 #       check for rule 1 (next generation)
 #       check for rule 2 (under and overpopulation)
@@ -28,7 +27,6 @@ import pygame
 # iterate through the list and check for for each cell if rule 3 is applicable
 
 
-# TODO: implement class Cell
 class Cell(object):
     def __init__(self, position):
         self.position = position
@@ -42,7 +40,7 @@ class Grid(object):
         self.rows = rows
         self.columns = columns
         self.cell_count = rows + 1 * columns + 1  # Not sure if I need this
-        self.grid = self.create_grid()
+        self.grid = self.create_grid()  # Careful, grid is used like this: self.grid[y][x]
         self.live_cells = set()
 
     def create_grid(self):
@@ -66,6 +64,50 @@ class Grid(object):
     def get_live_cells_set(self):
         return self.live_cells
 
+    def get_neighbours(self, cell):
+        position = cell.position
+        neighbours = set()
+        neighbours.update([
+            self.grid[position[-1]][position[-1]],  # top - left
+            self.grid[position[0]][position[-1]],  # top - center
+            self.grid[position[1]][position[-1]],  # top - right
+
+            self.grid[position[-1]][position[0]],  # middle - left
+            self.grid[position[1]][position[0]],  # middle - right
+
+            self.grid[position[-1]][position[1]],  # bottom - left
+            self.grid[position[0]][position[1]],  # bottom - center
+            self.grid[position[1]][position[1]],  # bottom - right
+        ])
+        return neighbours
+
+    def check_neighbours_status(self, cell):
+        neighbours = self.get_neighbours(cell)
+        live_counter = 0
+        for neighbour in neighbours:
+            if neighbour.live:
+                live_counter = live_counter + 1
+            else:
+                # TODO: Maybe add a list(?) with the neighbours that are near a live cell
+                #  and later iterate through them for rule 3
+                pass
+
+        return live_counter
+
+    def rule_1_next_generation(self):
+        pass
+
+    def rule_2_under_and_overpopulation(self):
+        pass
+
+    def rule_3_reproduction(self):
+        pass
+
+    def check_rules(self):
+        self.rule_1_next_generation()
+        self.rule_2_under_and_overpopulation()
+        self.rule_3_reproduction()
+
 
 def draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_between_columns):
     live_cells_set = my_grid.get_live_cells_set()
@@ -84,7 +126,6 @@ def draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_b
                          ))
 
 
-# TODO: maybe add lines around the window
 def draw_border(window, screen_size, color_lines):
     # Upper left corner to the upper right corner
     pygame.draw.line(window, color_lines, (0, 0), (screen_size[0], 0))
@@ -153,8 +194,14 @@ def main():
     my_grid.set_cell_live((3, 6))
     my_grid.set_cell_live((4, 5))
 
+    clock = pygame.time.Clock()
+
     running = True
     while running:
+        # TODO: alter the following the lines and see which is beneficial for the game!
+        pygame.time.delay(50)
+        clock.tick(10)
+
         # While in running pygame one of the 4 pygame.even.X functions HAS to be called
         # Else the OS will think that the game has crashed
         # You should also implement the QUIT event first, so that you can comfortably quit the project
