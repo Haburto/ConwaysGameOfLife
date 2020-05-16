@@ -42,6 +42,8 @@ class Grid(object):
         self.cell_count = rows + 1 * columns + 1  # Not sure if I need this
         self.grid = self.create_grid()  # Careful, grid is used like this: self.grid[y][x]
         self.live_cells = set()
+        self.cells_touched_by_life = set()
+        self.cells_about_to_die = set()
 
     def create_grid(self):
         grid = [[Cell((x, y)) for x in range(self.columns)] for y in range(self.rows)]
@@ -81,21 +83,21 @@ class Grid(object):
         ])
         return neighbours
 
-    def check_neighbours_status(self, cell):
-        neighbours = self.get_neighbours(cell)
+    def check_neighbours_status(self, neighbours):
         live_counter = 0
         for neighbour in neighbours:
             if neighbour.live:
                 live_counter = live_counter + 1
             else:
-                # TODO: Maybe add a list(?) with the neighbours that are near a live cell
-                #  and later iterate through them for rule 3
-                pass
-
+                self.cells_touched_by_life.add(neighbour)
         return live_counter
 
-    def rule_1_next_generation(self):
-        pass
+    def rule_1_next_generation(self, cell, live_counter):
+        if live_counter == 2 or live_counter == 3:
+            return True
+        else:
+            self.cells_about_to_die.add(cell)
+            return False
 
     def rule_2_under_and_overpopulation(self):
         pass
@@ -104,9 +106,20 @@ class Grid(object):
         pass
 
     def check_rules(self):
-        self.rule_1_next_generation()
-        self.rule_2_under_and_overpopulation()
-        self.rule_3_reproduction()
+        for cell in self.live_cells:
+            neighbours = self.get_neighbours(cell)
+            live_counter = self.check_neighbours_status(neighbours)
+            self.rule_1_next_generation(cell, live_counter)
+
+
+
+            self.rule_2_under_and_overpopulation()
+            # Needs the list with cells that are dead but near live cells
+            # Do not forget to reset that list in r3
+            self.rule_3_reproduction()
+
+        # List with cells that are about to die -> let them die now
+        # cells_about_to_die
 
 
 def draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_between_columns):
