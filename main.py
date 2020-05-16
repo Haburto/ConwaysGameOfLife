@@ -15,17 +15,32 @@ import pygame
 # TODO: test the wikipedia example patterns
 
 
+def event_handler():
+    global running
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            break
+
+
 def main():
+    global running
     pygame.init()
 
-    width = 500
+    width = 1000
     height = width
 
     window = pygame.display.set_mode((width, height))
 
     running = True
     while running:
-        pass
+        # While in running pygame one of the 4 pygame.even.X functions HAS to be called
+        # Else the OS will think that the game has crashed
+        # You should also implement the QUIT event first, so that you can comfortably quit the project
+        event_handler()
+
+    pygame.quit()
+    exit()
 
 
 main()
