@@ -42,7 +42,8 @@ class Grid(object):
         self.cell_count = rows + 1 * columns + 1  # Not sure if I need this
         self.grid = self.create_grid()  # Careful, grid is used like this: self.grid[y][x]
         self.live_cells = set()
-        self.cells_touched_by_life = set()
+        self.cells_touched_by_life = list()
+        self.cells_to_be_born = set()
         self.cells_about_to_die = set()
 
     def create_grid(self):
@@ -89,7 +90,7 @@ class Grid(object):
             if neighbour.live:
                 live_counter = live_counter + 1
             else:
-                self.cells_touched_by_life.add(neighbour)
+                self.cells_touched_by_life.append(neighbour)
         return live_counter
 
     def check_survival(self, live_counter):
@@ -98,8 +99,21 @@ class Grid(object):
         else:
             return False
 
-    def manage_reproduction(self):
-        pass
+    def check_reproduction(self):
+        # Might have to change ...set(...) into dict() but not sure
+        cells_touched_by_life_no_duplicates = list(set(self.cells_touched_by_life.copy()))
+        for cell in cells_touched_by_life_no_duplicates:
+            if self.cells_touched_by_life.count(cell) == 3:
+                self.cells_to_be_born.add(cell)
+
+    def manage_live_and_dead_cells(self):
+        self.cells_touched_by_life.clear()
+
+        for cell in self.cells_to_be_born:
+            self.set_cell_live(cell.position)
+
+        for cell in self.cells_about_to_die:
+            self.set_cell_dead(cell)
 
     def check_rules(self):
         for cell in self.live_cells:
@@ -108,23 +122,8 @@ class Grid(object):
             if not self.check_survival(live_counter):
                 self.cells_about_to_die.add(cell)
 
-            # Needs the list with cells that are dead but near live cells
-            # Do not forget to reset that list in r3
-            self.rule_3_reproduction()
-            # New idea: use a list that allows duplicates for "touched_by_life" cells
-            # Then copy the list and remove the duplicates
-            # Iterate through that list and for each item do:
-            #       count the number of times these items are in the first list
-            #       if it is >=3 (not sure about >, but == 3 is correct)
-            #       then the cell will go into a new list
-
-        # List with cells that are about to die -> let them die now
-        # cells_about_to_die
-        # Set them dead now
-
-        # List with cells that will be live
-        # STILL HAS TO BE CREATED
-        # Set them live now
+        self.check_reproduction()
+        self.manage_live_and_dead_cells()
 
 
 def draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_between_columns):
