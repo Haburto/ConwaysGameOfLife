@@ -50,12 +50,12 @@ class Grid(object):
         return grid
 
     def set_cell_live(self, position):
-        cell = self.grid[position[0]][position[1]]
+        cell = self.grid[position[1]][position[0]]
         cell.live = True
         self.live_cells.add(cell)
 
     def set_cell_dead(self, position):
-        cell = self.grid[position[0]][position[1]]
+        cell = self.grid[position[1]][position[0]]
         # Maybe check if the cell was already dead
         # Because then this method call should not be happening
         cell.live = False
@@ -63,12 +63,30 @@ class Grid(object):
         # Not sure if I want to handle such an error
         self.live_cells.discard(cell)
 
+    def get_live_cells_set(self):
+        return self.live_cells
 
-def draw_grid(window, screen_size, rows, columns):
-    size_between_rows = screen_size[0] // rows
-    size_between_columns = screen_size[1] // columns
-    color_lines = (255, 255, 255)
 
+# TODO: maybe add lines around the window
+
+def draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_between_columns):
+    live_cells_set = my_grid.get_live_cells_set()
+    for cell in live_cells_set:
+        x_start = cell.position[0] * size_between_columns + 1
+        y_start = cell.position[1] * size_between_rows + 1
+
+        width = size_between_columns - 2
+        height = size_between_rows - 2
+
+        pygame.draw.rect(window,
+                         color_live_cells,
+                         (
+                             x_start, y_start,
+                             width, height
+                         ))
+
+
+def draw_grid(window, screen_size, rows, columns, size_between_rows, size_between_columns, color_lines):
     for row in range(1, rows + 1):
         pygame.draw.line(window,
                          color_lines,
@@ -90,15 +108,17 @@ def event_handler():
             break
 
 
-def redraw_window(window, screen_size, rows, columns):
-    color_window = (0, 0, 0)
+def redraw_window(window, screen_size, rows, columns, my_grid, color_window, color_lines, color_live_cells):
+    size_between_rows = screen_size[0] // rows
+    size_between_columns = screen_size[1] // columns
+
     window.fill(color_window)
-    draw_grid(window, screen_size, rows, columns)
+    draw_grid(window, screen_size, rows, columns, size_between_rows, size_between_columns, color_lines)
+    draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_between_columns)
+
     pygame.display.update()
 
 
-# TODO: implement a easy way to change the screen settings
-# like row and column count, colors, etc.
 def main():
     global running
     pygame.init()
@@ -106,15 +126,21 @@ def main():
     width = 800
     height = width
     screen_size = (width, height)
-    rows = 50
-    columns = rows
-
     window = pygame.display.set_mode(screen_size)
 
+    rows = 50
+    columns = rows
     my_grid = Grid(rows, columns)
 
-    # TODO: remove this test part, after mouse implementation
-    my_grid.set_cell_live((2, 2))
+    color_window = (100, 100, 100)
+    color_lines = (60, 60, 60)
+    color_live_cells = (150, 150, 0)
+
+    # TODO: remove this test part, after mouse action implementation
+    my_grid.set_cell_live((0, 1))
+    my_grid.set_cell_live((3, 5))
+    my_grid.set_cell_live((3, 6))
+    my_grid.set_cell_live((4, 5))
 
     running = True
     while running:
@@ -122,7 +148,7 @@ def main():
         # Else the OS will think that the game has crashed
         # You should also implement the QUIT event first, so that you can comfortably quit the project
         event_handler()
-        redraw_window(window, screen_size, rows, columns)
+        redraw_window(window, screen_size, rows, columns, my_grid,color_window, color_lines, color_live_cells)
 
     pygame.quit()
     exit()
