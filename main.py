@@ -98,7 +98,7 @@ class Grid(object):
         else:
             return False
 
-    def rule_3_reproduction(self):
+    def manage_reproduction(self):
         pass
 
     def check_rules(self):
@@ -108,14 +108,23 @@ class Grid(object):
             if not self.check_survival(live_counter):
                 self.cells_about_to_die.add(cell)
 
-
-
             # Needs the list with cells that are dead but near live cells
             # Do not forget to reset that list in r3
             self.rule_3_reproduction()
+            # New idea: use a list that allows duplicates for "touched_by_life" cells
+            # Then copy the list and remove the duplicates
+            # Iterate through that list and for each item do:
+            #       count the number of times these items are in the first list
+            #       if it is >=3 (not sure about >, but == 3 is correct)
+            #       then the cell will go into a new list
 
         # List with cells that are about to die -> let them die now
         # cells_about_to_die
+        # Set them dead now
+
+        # List with cells that will be live
+        # STILL HAS TO BE CREATED
+        # Set them live now
 
 
 def draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_between_columns):
