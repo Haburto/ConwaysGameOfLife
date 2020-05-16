@@ -11,11 +11,7 @@ import pygame
 # 2. If there are <2 or >3 Cells nearby the cell dies
 # 3. If there are ==3 live cells near a dead cells, it becomes live
 # ----------
-# The cells know if they are alive or dead
-# The cells know their own position on the grid
 
-# The Grid(?) class creates all the cells
-# The grid somehow saves all the cells in a matrix(?)
 # The grid (?) has a list with alive cells
 # The grid is iterating through every alive cell and does the following:
 #       check for rule 1 (next generation)
@@ -31,6 +27,7 @@ import pygame
 # the list should not allow duplicates -> google tuple, list, dict, etc...
 # iterate through the list and check for for each cell if rule 3 is applicable
 
+
 # TODO: implement class Cell
 class Cell(object):
     def __init__(self, position):
@@ -39,8 +36,20 @@ class Cell(object):
 
 
 # TODO: implement class Grid
+# Check other possible names for the class Grid and the function draw_grid
 class Grid(object):
-    pass
+    def __init__(self, rows, columns):
+        self.rows = rows
+        self.columns = columns
+        self.cell_count = rows + 1 * columns + 1  # Not sure if I need this
+        self.grid = self.create_grid()
+
+    def create_grid(self):
+        grid = [[Cell((x, y)) for x in range(self.columns)] for y in range(self.rows)]
+        return grid
+
+    def set_cell_live(self, position):
+        self.grid[position[0]][position[1]].live = True
 
 
 def draw_grid(window, screen_size, rows, columns):
@@ -89,6 +98,11 @@ def main():
     columns = rows
 
     window = pygame.display.set_mode(screen_size)
+
+    my_grid = Grid(rows, columns)
+
+    # TODO: remove this test part, after mouse implementation
+    my_grid.set_cell_live((2, 2))
 
     running = True
     while running:
