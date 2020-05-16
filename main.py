@@ -1,7 +1,8 @@
 import pygame
 
-# TODO: create class Cell and implement the logic (rules)
+# TODO: test the wikipedia example patterns
 
+# TODO: implement the logic
 # RULES for Conways Game of Life
 # A cell has two states 'live' or 'dead'
 # A cell interacts with its eight neighbours (horizontally, vertically or diagonally adjacent)
@@ -9,11 +10,39 @@ import pygame
 # 1. If a cell has ==2 or ==3 neighbours it survives
 # 2. If there are <2 or >3 Cells nearby the cell dies
 # 3. If there are ==3 live cells near a dead cells, it becomes live
+# ----------
+# The cells know if they are alive or dead
+# The cells know their own position on the grid
 
-# TODO: test the wikipedia example patterns
+# The Grid(?) class creates all the cells
+# The grid somehow saves all the cells in a matrix(?)
+# The grid (?) has a list with alive cells
+# The grid is iterating through every alive cell and does the following:
+#       check for rule 1 (next generation)
+#       check for rule 2 (under and overpopulation)
+#       check for rule 3 (reproduction)
+
+# Rule 1: check the neighbours and act accordingly on the specific cell
+# Rule 2: == rule 1
+# Maybe create a list with cells that will die and iterate through the list after all rules were calculated (?)
+# Not sure how the order should be
+
+# Rule 3: Create a list with cells that have neighbours that are live
+# the list should not allow duplicates -> google tuple, list, dict, etc...
+# iterate through the list and check for for each cell if rule 3 is applicable
+
+# TODO: implement class Cell
+class Cell(object):
+    def __init__(self, position):
+        self.position = position
+        self.live = False
 
 
-# TODO: create grid with pygame
+# TODO: implement class Grid
+class Grid(object):
+    pass
+
+
 def draw_grid(window, screen_size, rows, columns):
     size_between_rows = screen_size[0] // rows
     size_between_columns = screen_size[1] // columns
