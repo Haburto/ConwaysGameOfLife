@@ -67,16 +67,14 @@ class Grid(object):
         return self.live_cells
 
 
-# TODO: maybe add lines around the window
-
 def draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_between_columns):
     live_cells_set = my_grid.get_live_cells_set()
     for cell in live_cells_set:
         x_start = cell.position[0] * size_between_columns + 1
         y_start = cell.position[1] * size_between_rows + 1
 
-        width = size_between_columns - 2
-        height = size_between_rows - 2
+        width = size_between_columns - 1
+        height = size_between_rows - 1
 
         pygame.draw.rect(window,
                          color_live_cells,
@@ -84,6 +82,18 @@ def draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_b
                              x_start, y_start,
                              width, height
                          ))
+
+
+# TODO: maybe add lines around the window
+def draw_border(window, screen_size, color_lines):
+    # Upper left corner to the upper right corner
+    pygame.draw.line(window, color_lines, (0, 0), (screen_size[0], 0))
+    # Upper left corner to the lower left corner
+    pygame.draw.line(window, color_lines, (0, 0), (0, screen_size[1]))
+    # Lower right corner to the upper right corner
+    pygame.draw.line(window, color_lines, (screen_size[0], screen_size[1]), (screen_size[0], 0))
+    # Lower right corner to the lower left corner
+    pygame.draw.line(window, color_lines, (screen_size[0], screen_size[1]), (0, screen_size[1]))
 
 
 def draw_grid(window, screen_size, rows, columns, size_between_rows, size_between_columns, color_lines):
@@ -114,6 +124,7 @@ def redraw_window(window, screen_size, rows, columns, my_grid, color_window, col
 
     window.fill(color_window)
     draw_grid(window, screen_size, rows, columns, size_between_rows, size_between_columns, color_lines)
+    draw_border(window, screen_size, color_lines)
     draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_between_columns)
 
     pygame.display.update()
