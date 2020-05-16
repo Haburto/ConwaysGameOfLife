@@ -113,7 +113,7 @@ class Grid(object):
             self.set_cell_live(cell.position)
 
         for cell in self.cells_about_to_die:
-            self.set_cell_dead(cell)
+            self.set_cell_dead(cell.position)
 
     def check_rules(self):
         for cell in self.live_cells:
@@ -206,24 +206,33 @@ def main():
     color_live_cells = (150, 150, 0)
 
     # TODO: remove this test part, after mouse action implementation
-    my_grid.set_cell_live((0, 1))
-    my_grid.set_cell_live((3, 5))
-    my_grid.set_cell_live((3, 6))
-    my_grid.set_cell_live((4, 5))
+    my_grid.set_cell_live((3, 3))
+    my_grid.set_cell_live((3, 4))
+    my_grid.set_cell_live((4, 3))
+    my_grid.set_cell_live((4, 4))
 
     clock = pygame.time.Clock()
 
+    # TODO: change the following solution to something not that stupid
+    first_loop = True
+
     running = True
     while running:
+        print("while_loop")
         # TODO: alter the following the lines and see which is beneficial for the game!
-        pygame.time.delay(50)
-        clock.tick(10)
+        # 500 ms seem good for 'gameplay', 1000+ is good for testing the logic
+        pygame.time.delay(1000)
+        #clock.tick(10)
 
         # While in running pygame one of the 4 pygame.even.X functions HAS to be called
         # Else the OS will think that the game has crashed
         # You should also implement the QUIT event first, so that you can comfortably quit the project
         event_handler()
+        if not first_loop:
+            my_grid.check_rules()
+
         redraw_window(window, screen_size, rows, columns, my_grid,color_window, color_lines, color_live_cells)
+        first_loop = False
 
     pygame.quit()
     exit()
