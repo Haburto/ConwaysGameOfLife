@@ -92,15 +92,11 @@ class Grid(object):
                 self.cells_touched_by_life.add(neighbour)
         return live_counter
 
-    def rule_1_next_generation(self, cell, live_counter):
+    def check_survival(self, live_counter):
         if live_counter == 2 or live_counter == 3:
             return True
         else:
-            self.cells_about_to_die.add(cell)
             return False
-
-    def rule_2_under_and_overpopulation(self):
-        pass
 
     def rule_3_reproduction(self):
         pass
@@ -109,11 +105,11 @@ class Grid(object):
         for cell in self.live_cells:
             neighbours = self.get_neighbours(cell)
             live_counter = self.check_neighbours_status(neighbours)
-            self.rule_1_next_generation(cell, live_counter)
+            if not self.check_survival(live_counter):
+                self.cells_about_to_die.add(cell)
 
 
 
-            self.rule_2_under_and_overpopulation()
             # Needs the list with cells that are dead but near live cells
             # Do not forget to reset that list in r3
             self.rule_3_reproduction()
