@@ -39,9 +39,9 @@ class Grid(object):
     def __init__(self, rows, columns):
         self.rows = rows
         self.columns = columns
-        self.cell_count = rows + 1 * columns + 1  # Not sure if I need this
         self.grid = self.create_grid()  # Careful, grid is used like this: self.grid[y][x]
         self.live_cells = set()
+
         self.cells_touched_by_life = list()
         self.cells_to_be_born = set()
         self.cells_about_to_die = set()
@@ -72,14 +72,14 @@ class Grid(object):
         neighbours = set()
         neighbours.update([
             self.grid[position[-1]][position[-1]],  # top - left
-            self.grid[position[0]][position[-1]],  # top - center
-            self.grid[position[1]][position[-1]],  # top - right
+            self.grid[position[-1]][position[0]],  # top - center
+            self.grid[position[-1]][position[1]],  # top - right
 
-            self.grid[position[-1]][position[0]],  # middle - left
-            self.grid[position[1]][position[0]],  # middle - right
+            self.grid[position[0]][position[-1]],  # middle - left
+            self.grid[position[0]][position[1]],  # middle - right
 
-            self.grid[position[-1]][position[1]],  # bottom - left
-            self.grid[position[0]][position[1]],  # bottom - center
+            self.grid[position[1]][position[-1]],  # bottom - left
+            self.grid[position[1]][position[0]],  # bottom - center
             self.grid[position[1]][position[1]],  # bottom - right
         ])
         return neighbours
@@ -101,19 +101,29 @@ class Grid(object):
 
     def check_reproduction(self):
         # Might have to change ...set(...) into dict() but not sure
-        cells_touched_by_life_no_duplicates = list(set(self.cells_touched_by_life.copy()))
+        cells_touched_by_life_no_duplicates = list(set(self.cells_touched_by_life))
+        # TODO: print each cells position in the following 2 lists
+        #  printing the cells themselves seemed like there was only 1 to 4 duplicates
+        #  which are not enough to make sense!
+        # print("-------------111111111111111-")
+        # print(self.cells_touched_by_life)
+        # print("-------------222222222222222-")
+        # print(cells_touched_by_life_no_duplicates)
+
         for cell in cells_touched_by_life_no_duplicates:
             if self.cells_touched_by_life.count(cell) == 3:
                 self.cells_to_be_born.add(cell)
 
     def manage_live_and_dead_cells(self):
-        self.cells_touched_by_life.clear()
-
         for cell in self.cells_to_be_born:
             self.set_cell_live(cell.position)
 
         for cell in self.cells_about_to_die:
             self.set_cell_dead(cell.position)
+
+        self.cells_touched_by_life.clear()
+        self.cells_to_be_born.clear()
+        self.cells_about_to_die.clear()
 
     def check_rules(self):
         for cell in self.live_cells:
@@ -206,23 +216,55 @@ def main():
     color_live_cells = (150, 150, 0)
 
     # TODO: remove this test part, after mouse action implementation
+    # Still lifes
+    # Block
     my_grid.set_cell_live((3, 3))
     my_grid.set_cell_live((3, 4))
     my_grid.set_cell_live((4, 3))
     my_grid.set_cell_live((4, 4))
+    # Bee-hive
+    my_grid.set_cell_live((10,10))
+    my_grid.set_cell_live((11,10))
+    my_grid.set_cell_live((9,11))
+    my_grid.set_cell_live((12,11))
+    my_grid.set_cell_live((10,12))
+    my_grid.set_cell_live((11,12))
+    # Loaf
+    my_grid.set_cell_live((20,20))
+    my_grid.set_cell_live((21,20))
+    my_grid.set_cell_live((19,21))
+    my_grid.set_cell_live((22,21))
+    my_grid.set_cell_live((20,22))
+    my_grid.set_cell_live((22,22))
+    my_grid.set_cell_live((21,23))
+    # Boat
+    my_grid.set_cell_live((30,30))
+    my_grid.set_cell_live((31,30))
+    my_grid.set_cell_live((30,31))
+    my_grid.set_cell_live((32,31))
+    my_grid.set_cell_live((31,32))
+    # Tub
+    my_grid.set_cell_live((40,40))
+    my_grid.set_cell_live((39,41))
+    my_grid.set_cell_live((41,41))
+    my_grid.set_cell_live((40,42))
 
-    clock = pygame.time.Clock()
 
     # TODO: change the following solution to something not that stupid
     first_loop = True
 
+    old_tick = 0
+
     running = True
     while running:
-        print("while_loop")
+        current_tick = round(pygame.time.get_ticks() / 1000, 2)
+        difference = round((current_tick - old_tick), 2)
+
+        print("while_loop", difference, current_tick)
+        old_tick = current_tick
         # TODO: alter the following the lines and see which is beneficial for the game!
         # 500 ms seem good for 'gameplay', 1000+ is good for testing the logic
-        pygame.time.delay(1000)
-        #clock.tick(10)
+        pygame.time.delay(3000)
 
         # While in running pygame one of the 4 pygame.even.X functions HAS to be called
         # Else the OS will think that the game has crashed
