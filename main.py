@@ -43,13 +43,25 @@ class Grid(object):
         self.columns = columns
         self.cell_count = rows + 1 * columns + 1  # Not sure if I need this
         self.grid = self.create_grid()
+        self.live_cells = set()
 
     def create_grid(self):
         grid = [[Cell((x, y)) for x in range(self.columns)] for y in range(self.rows)]
         return grid
 
     def set_cell_live(self, position):
-        self.grid[position[0]][position[1]].live = True
+        cell = self.grid[position[0]][position[1]]
+        cell.live = True
+        self.live_cells.add(cell)
+
+    def set_cell_dead(self, position):
+        cell = self.grid[position[0]][position[1]]
+        # Maybe check if the cell was already dead
+        # Because then this method call should not be happening
+        cell.live = False
+        # x.remove() will throw an error when the item is not in the set
+        # Not sure if I want to handle such an error
+        self.live_cells.discard(cell)
 
 
 def draw_grid(window, screen_size, rows, columns):
