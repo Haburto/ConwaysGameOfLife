@@ -164,26 +164,7 @@ def redraw_window(window, screen_size, rows, columns, my_grid, color_window, col
 
     pygame.display.update()
 
-
-def main():
-    global running
-    pygame.init()
-
-    width = 800
-    height = width
-    screen_size = (width, height)
-    window = pygame.display.set_mode(screen_size)
-
-    rows = 50
-    columns = rows
-    my_grid = Grid(rows, columns)
-
-    color_window = (100, 100, 100)
-    color_lines = (60, 60, 60)
-    color_live_cells = (150, 150, 0)
-
-    # TODO: remove this test part, after mouse action implementation
-    # Still lifes
+def activate_still_lifes(my_grid):
     # Block
     my_grid.set_cell_live((3, 3))
     my_grid.set_cell_live((3, 4))
@@ -216,7 +197,8 @@ def main():
     my_grid.set_cell_live((41, 41))
     my_grid.set_cell_live((40, 42))
 
-    # Oscillators
+
+def activate_oscillators(my_grid):
     # Blinker (period 2)
     my_grid.set_cell_live((13, 3))
     my_grid.set_cell_live((13, 4))
@@ -236,15 +218,41 @@ def main():
     my_grid.set_cell_live((43, 33))
     my_grid.set_cell_live((43, 32))
 
+
+# TODO: implement mouse support
+# TODO: implement an explanation window for users (tkinter)
+# TODO: implement a pre-game phase (in which the user can choose cells that are live)
+# TODO: implement a pause-function
+# TODO: implement a reset-function
+# TODO: implement a way to let the user activate the predefined functions
+def main():
+    global running
+    pygame.init()
+
+    width = 800
+    height = width
+    screen_size = (width, height)
+    window = pygame.display.set_mode(screen_size)
+
+    rows = 50
+    columns = rows
+    my_grid = Grid(rows, columns)
+
+    color_window = (100, 100, 100)
+    color_lines = (60, 60, 60)
+    color_live_cells = (150, 150, 0)
+
+    # TODO: remove this test part, after user-input implementation
+    # Still lifes
+    activate_still_lifes(my_grid)
+    # Oscillators
+    activate_oscillators(my_grid)
+
     redraw_window(window, screen_size, rows, columns, my_grid, color_window, color_lines, color_live_cells)
-    # TODO: implement mouse support
-    # TODO: implement an explanation window for users (tkinter)
-    # TODO: implement a pre-game phase (in which the user can choose cells that are live)
-    # TODO: implement a pause-function
-    # TODO: implement a reset-function
+
     running = True
     while running:
-        # TODO: is there a better alternative for pygame.time.delay(x)?
+        # TODO: check for a better alternative for pygame.time.delay(x)
         pygame.time.delay(500)
         event_handler()
         my_grid.check_rules()
