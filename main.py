@@ -1,31 +1,5 @@
 import pygame
 
-# TODO: test the wikipedia example patterns
-
-# TODO: implement the logic
-# RULES for Conways Game of Life
-# A cell has two states 'live' or 'dead'
-# A cell interacts with its eight neighbours (horizontally, vertically or diagonally adjacent)
-
-# 1. If a cell has ==2 or ==3 neighbours it survives
-# 2. If there are <2 or >3 Cells nearby the cell dies
-# 3. If there are ==3 live cells near a dead cells, it becomes live
-# ----------
-
-# The grid is iterating through every alive cell and does the following:
-#       check for rule 1 (next generation)
-#       check for rule 2 (under and overpopulation)
-#       check for rule 3 (reproduction)
-
-# Rule 1: check the neighbours and act accordingly on the specific cell
-# Rule 2: == rule 1
-# Maybe create a list with cells that will die and iterate through the list after all rules were calculated (?)
-# Not sure how the order should be
-
-# Rule 3: Create a list with cells that have neighbours that are live
-# the list should not allow duplicates -> google tuple, list, dict, etc...
-# iterate through the list and check for for each cell if rule 3 is applicable
-
 
 class Cell(object):
     def __init__(self, position):
@@ -33,7 +7,6 @@ class Cell(object):
         self.live = False
 
 
-# TODO: implement class Grid
 # Check other possible names for the class Grid and the function draw_grid
 class Grid(object):
     def __init__(self, rows, columns):
@@ -71,16 +44,16 @@ class Grid(object):
         position = cell.position
         neighbours = set()
         neighbours.update([
-            self.grid[position[-1]][position[-1]],  # top - left
-            self.grid[position[-1]][position[0]],  # top - center
-            self.grid[position[-1]][position[1]],  # top - right
+            self.grid[position[1]-1][position[0]-1],  # top - left
+            self.grid[position[1]-1][position[0]],  # top - center
+            self.grid[position[1]-1][position[0]+1],  # top - right
 
-            self.grid[position[0]][position[-1]],  # middle - left
-            self.grid[position[0]][position[1]],  # middle - right
+            self.grid[position[1]][position[0]-1],  # middle - left
+            self.grid[position[1]][position[0]+1],  # middle - right
 
-            self.grid[position[1]][position[-1]],  # bottom - left
-            self.grid[position[1]][position[0]],  # bottom - center
-            self.grid[position[1]][position[1]],  # bottom - right
+            self.grid[position[1]+1][position[0]-1],  # bottom - left
+            self.grid[position[1]+1][position[0]],  # bottom - center
+            self.grid[position[1]+1][position[0]+1],  # bottom - right
         ])
         return neighbours
 
@@ -100,16 +73,7 @@ class Grid(object):
             return False
 
     def check_reproduction(self):
-        # Might have to change ...set(...) into dict() but not sure
         cells_touched_by_life_no_duplicates = list(set(self.cells_touched_by_life))
-        # TODO: print each cells position in the following 2 lists
-        #  printing the cells themselves seemed like there was only 1 to 4 duplicates
-        #  which are not enough to make sense!
-        # print("-------------111111111111111-")
-        # print(self.cells_touched_by_life)
-        # print("-------------222222222222222-")
-        # print(cells_touched_by_life_no_duplicates)
-
         for cell in cells_touched_by_life_no_duplicates:
             if self.cells_touched_by_life.count(cell) == 3:
                 self.cells_to_be_born.add(cell)
@@ -223,48 +187,59 @@ def main():
     my_grid.set_cell_live((4, 3))
     my_grid.set_cell_live((4, 4))
     # Bee-hive
-    my_grid.set_cell_live((10,10))
-    my_grid.set_cell_live((11,10))
-    my_grid.set_cell_live((9,11))
-    my_grid.set_cell_live((12,11))
-    my_grid.set_cell_live((10,12))
-    my_grid.set_cell_live((11,12))
+    my_grid.set_cell_live((10, 10))
+    my_grid.set_cell_live((11, 10))
+    my_grid.set_cell_live((9, 11))
+    my_grid.set_cell_live((12, 11))
+    my_grid.set_cell_live((10, 12))
+    my_grid.set_cell_live((11, 12))
     # Loaf
-    my_grid.set_cell_live((20,20))
-    my_grid.set_cell_live((21,20))
-    my_grid.set_cell_live((19,21))
-    my_grid.set_cell_live((22,21))
-    my_grid.set_cell_live((20,22))
-    my_grid.set_cell_live((22,22))
-    my_grid.set_cell_live((21,23))
+    my_grid.set_cell_live((20, 20))
+    my_grid.set_cell_live((21, 20))
+    my_grid.set_cell_live((19, 21))
+    my_grid.set_cell_live((22, 21))
+    my_grid.set_cell_live((20, 22))
+    my_grid.set_cell_live((22, 22))
+    my_grid.set_cell_live((21, 23))
     # Boat
-    my_grid.set_cell_live((30,30))
-    my_grid.set_cell_live((31,30))
-    my_grid.set_cell_live((30,31))
-    my_grid.set_cell_live((32,31))
-    my_grid.set_cell_live((31,32))
+    my_grid.set_cell_live((30, 30))
+    my_grid.set_cell_live((31, 30))
+    my_grid.set_cell_live((30, 31))
+    my_grid.set_cell_live((32, 31))
+    my_grid.set_cell_live((31, 32))
     # Tub
-    my_grid.set_cell_live((40,40))
-    my_grid.set_cell_live((39,41))
-    my_grid.set_cell_live((41,41))
-    my_grid.set_cell_live((40,42))
+    my_grid.set_cell_live((40, 40))
+    my_grid.set_cell_live((39, 41))
+    my_grid.set_cell_live((41, 41))
+    my_grid.set_cell_live((40, 42))
 
+    # Oscillators
+    # Blinker (period 2)
+    my_grid.set_cell_live((13, 3))
+    my_grid.set_cell_live((13, 4))
+    my_grid.set_cell_live((13, 5))
+    # Toad (period 2)
+    my_grid.set_cell_live((20, 10))
+    my_grid.set_cell_live((21, 10))
+    my_grid.set_cell_live((22, 10))
+    my_grid.set_cell_live((19, 11))
+    my_grid.set_cell_live((20, 11))
+    my_grid.set_cell_live((21, 11))
+    # Beacon (period 2)
+    my_grid.set_cell_live((40, 30))
+    my_grid.set_cell_live((41, 30))
+    my_grid.set_cell_live((40, 31))
+    my_grid.set_cell_live((42, 33))
+    my_grid.set_cell_live((43, 33))
+    my_grid.set_cell_live((43, 32))
 
     # TODO: change the following solution to something not that stupid
     first_loop = True
-
-    old_tick = 0
-
     running = True
     while running:
-        current_tick = round(pygame.time.get_ticks() / 1000, 2)
-        difference = round((current_tick - old_tick), 2)
-
-        print("while_loop", difference, current_tick)
-        old_tick = current_tick
-        # TODO: alter the following the lines and see which is beneficial for the game!
+        # TODO: is there a better alternative for pygame.time.delay(x)?
         # 500 ms seem good for 'gameplay', 1000+ is good for testing the logic
-        pygame.time.delay(3000)
+        pygame.time.delay(500)
 
         # While in running pygame one of the 4 pygame.even.X functions HAS to be called
         # Else the OS will think that the game has crashed
