@@ -142,6 +142,9 @@ def draw_grid(window, screen_size, rows, columns, size_between_rows, size_betwee
                          (column * size_between_columns, screen_size[1]))
 
 
+# While in running pygame one of the 4 pygame.even.X functions HAS to be called
+# Else the OS will think that the game has crashed
+# You should also implement the QUIT event first, so that you can comfortably quit the project
 def event_handler():
     global running
     for event in pygame.event.get():
@@ -233,23 +236,19 @@ def main():
     my_grid.set_cell_live((43, 33))
     my_grid.set_cell_live((43, 32))
 
-    # TODO: change the following solution to something not that stupid
-    first_loop = True
+    redraw_window(window, screen_size, rows, columns, my_grid, color_window, color_lines, color_live_cells)
+    # TODO: implement mouse support
+    # TODO: implement an explanation window for users (tkinter)
+    # TODO: implement a pre-game phase (in which the user can choose cells that are live)
+    # TODO: implement a pause-function
+    # TODO: implement a reset-function
     running = True
     while running:
         # TODO: is there a better alternative for pygame.time.delay(x)?
-        # 500 ms seem good for 'gameplay', 1000+ is good for testing the logic
         pygame.time.delay(500)
-
-        # While in running pygame one of the 4 pygame.even.X functions HAS to be called
-        # Else the OS will think that the game has crashed
-        # You should also implement the QUIT event first, so that you can comfortably quit the project
         event_handler()
-        if not first_loop:
-            my_grid.check_rules()
-
+        my_grid.check_rules()
         redraw_window(window, screen_size, rows, columns, my_grid,color_window, color_lines, color_live_cells)
-        first_loop = False
 
     pygame.quit()
     exit()
