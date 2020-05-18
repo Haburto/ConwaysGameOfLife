@@ -3,6 +3,9 @@ import tkinter
 from tkinter import messagebox
 
 
+# I am not sure if my game_init solution is the best solution, but it definitely helps to fight the clutter
+# That some of my function calls have had
+# It also helps me to only have one part of the code that I need to change for options like colour and size
 class GameInitialization(object):
     # TODO: research if getter and setters are a thing in python
     #  and how to properly achieve it if it is a thing
@@ -12,6 +15,7 @@ class GameInitialization(object):
 
     rows = 50
     columns = rows
+    axis_length = (rows, columns)
 
     size_between_rows = screen_size[0] // rows
     size_between_columns = screen_size[1] // columns
@@ -37,9 +41,9 @@ class Cell(object):
 
 # Check other possible names for the class Grid and the function draw_grid
 class Grid(object):
-    def __init__(self, rows, columns):
-        self.rows = rows
-        self.columns = columns
+    def __init__(self, axis_length):
+        self.rows = axis_length[0]
+        self.columns = axis_length[1]
         self.grid = self.create_grid()  # Careful, grid is used like this: self.grid[y][x]
         self.live_cells = set()
 
@@ -128,7 +132,11 @@ class Grid(object):
         self.manage_live_and_dead_cells()
 
 
-def draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_between_columns):
+def draw_live_cells(window, my_grid, game_init):
+    color_live_cells = game_init.color_live_cells
+    size_between_rows = game_init.size_between_rows
+    size_between_columns = game_init.size_between_columns
+
     live_cells_set = my_grid.get_live_cells_set()
     for cell in live_cells_set:
         x_start = cell.position[0] * size_between_columns + 1
@@ -145,7 +153,9 @@ def draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_b
                          ))
 
 
-def draw_border(window, screen_size, color_lines):
+def draw_border(window, game_init):
+    screen_size = game_init.screen_size
+    color_lines = game_init.color_lines
     # Upper left corner to the upper right corner
     pygame.draw.line(window, color_lines, (0, 0), (screen_size[0], 0))
     # Upper left corner to the lower left corner
@@ -156,7 +166,14 @@ def draw_border(window, screen_size, color_lines):
     pygame.draw.line(window, color_lines, (screen_size[0], screen_size[1]), (0, screen_size[1]))
 
 
-def draw_grid(window, screen_size, rows, columns, size_between_rows, size_between_columns, color_lines):
+def draw_grid(window, game_init):
+    screen_size = game_init.screen_size
+    rows = game_init.rows
+    columns = game_init.columns
+    size_between_rows = game_init.size_between_rows
+    size_between_columns = game_init.size_between_columns
+    color_lines = game_init.color_lines
+
     for row in range(1, rows + 1):
         pygame.draw.line(window,
                          color_lines,
@@ -233,14 +250,11 @@ def event_handler():
             pass
 
 
-def redraw_window(window, screen_size, rows, columns, my_grid, color_window, color_lines, color_live_cells):
-    size_between_rows = screen_size[0] // rows
-    size_between_columns = screen_size[1] // columns
-
-    window.fill(color_window)
-    draw_grid(window, screen_size, rows, columns, size_between_rows, size_between_columns, color_lines)
-    draw_border(window, screen_size, color_lines)
-    draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_between_columns)
+def redraw_window(window, my_grid, game_init):
+    window.fill(game_init.color_window)
+    draw_grid(window, game_init)
+    draw_border(window, game_init)
+    draw_live_cells(window, my_grid, game_init)
 
     pygame.display.update()
 
@@ -351,19 +365,10 @@ def welcome_window():
 def main():
     global running
     pygame.init()
+    game_init = GameInitialization()
 
-    width = 800
-    height = width
-    screen_size = (width, height)
-    window = pygame.display.set_mode(screen_size)
-
-    rows = 50
-    columns = rows
-    my_grid = Grid(rows, columns)
-
-    color_window = (100, 100, 100)
-    color_lines = (60, 60, 60)
-    color_live_cells = (150, 150, 0)
+    window = pygame.display.set_mode(game_init.screen_size)
+    my_grid = Grid(game_init.axis_length)
 
     # TODO: remove this test part, after user-input implementation
     #  Or maybe implement a way to choose these as presets in the pre-phase
@@ -372,7 +377,7 @@ def main():
     # Oscillators
     activate_oscillators(my_grid)
 
-    redraw_window(window, screen_size, rows, columns, my_grid, color_window, color_lines, color_live_cells)
+    redraw_window(window, my_grid, game_init)
 
     # Not sure if I should use tkinter or try it with pygame!
     welcome_window()
@@ -383,7 +388,7 @@ def main():
         pygame.time.delay(500)
         event_handler()
         my_grid.check_rules()
-        redraw_window(window, screen_size, rows, columns, my_grid,color_window, color_lines, color_live_cells)
+        redraw_window(window, my_grid, game_init)
 
     pygame.quit()
     exit()
