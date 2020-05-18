@@ -1,4 +1,6 @@
 import pygame
+import tkinter
+from tkinter import messagebox
 
 
 class Cell(object):
@@ -141,16 +143,68 @@ def draw_grid(window, screen_size, rows, columns, size_between_rows, size_betwee
                          (column * size_between_columns, 0),
                          (column * size_between_columns, screen_size[1]))
 
+# TODO: replace the placeholders
+def get_grid_position(mouse_pos):
+    position = set()
+    size_between_rows_PLACEHOLDER = 5
+    size_between_columns_PLACEHOLDER = 5
+    position[0] = mouse_pos[0] // size_between_columns_PLACEHOLDER
+    position[1] = mouse_pos[1] // size_between_rows_PLACEHOLDER
+
+
+    print("position is:", position)
 
 # While in running pygame one of the 4 pygame.even.X functions HAS to be called
 # Else the OS will think that the game has crashed
 # You should also implement the QUIT event first, so that you can comfortably quit the project
 def event_handler():
     global running
+    print("in event_handler()")
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
             break
+        # TODO: Test if keys has to be outside of the for loop
+        keys = pygame.key.get_pressed()
+        # TODO: Use the mouse and click on cells to set them live
+        # TODO: Maybe implement a cell deletion on MOUSE-2 rather than clicking them again
+#         in event_handler()
+#         in for ...event.get()
+#         event < Event(5 - MouseButtonDown
+#         {'pos': (267, 277), 'button': 1, 'window': None}) >
+#         in for ...event.get()
+#         event < Event(6 - MouseButtonUp
+#         {'pos': (267, 277), 'button': 1, 'window': None}) >
+#         in for ...event.get()
+#         event < Event(4 - MouseMotion
+#         {'pos': (342, 295), 'rel': (75, 18), 'buttons': (0, 0, 0), 'window': None}) >
+#         in event_handler()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print("BUTTON DOWN ------------------------------------------")
+            # Convert pos into corresponding cell
+            # This cell will be set alive
+            # Do this until "MOUSEBUTTONUP"
+            # So players can click single cells, or 'drawn' multiple cells to set them live
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print("BUTTON UP --------------------------------------------")
+
+
+
+        # in for ...event.get()
+        # event < Event(2 - KeyDown
+        # {'unicode': 'r', 'key': 114, 'mod': 0, 'scancode': 19, 'window': None}) >
+        # TODO: Press 'spacebar' to start the simulation
+        elif keys[pygame.K_SPACE]:
+            print("implement key 'space' to start the game")
+            pass
+        # TODO: Press 'p' to pause the game
+        elif keys[pygame.K_p]:
+            print("implement key 'p' to pause")
+            pass
+        # TODO: Press 'r' to reset the game and open this window once again
+        elif keys[pygame.K_r]:
+            print("implement key 'r' to reset the game")
+            pass
 
 
 def redraw_window(window, screen_size, rows, columns, my_grid, color_window, color_lines, color_live_cells):
@@ -163,6 +217,7 @@ def redraw_window(window, screen_size, rows, columns, my_grid, color_window, col
     draw_live_cells(window, my_grid, color_live_cells, size_between_rows, size_between_columns)
 
     pygame.display.update()
+
 
 def activate_still_lifes(my_grid):
     # Block
@@ -219,12 +274,52 @@ def activate_oscillators(my_grid):
     my_grid.set_cell_live((43, 32))
 
 
+def welcome_window():
+    root = tkinter.Tk()
+    root.attributes("-topmost", True)
+    root.withdraw()  # Hides the main tk window
+    subject = "Important information"
+    content = "Thanks for playing this game!" \
+              "\n\n" \
+              "How to play?" \
+              "\n\n" \
+              "There are 3 rules that decide what happens in the game." \
+              "\n1. If a cell has 2 or 3 neighbours it will survive (next generation)" \
+              "\n2. If a cell has less than 2 (underpopulation)." \
+              "\n   or more than 3 (overpopulation) cells nearby it dies." \
+              "\n3. Any dead cell with exactly 3 neighbours will become live (reproduction)." \
+              "\n\n" \
+              "Hotkeys:" \
+              "\nUse the mouse and click on cells to set them live" \
+              "\nPress 'spacebar' to start the simulation" \
+              "\nPress 'p' to pause the game" \
+              "\nPress 'r' to reset the game and open this window once again" \
+              "\n\n" \
+              "Pressing on 'Ok' will start the game!"
+
+    messagebox.showinfo(subject, content)
+    try:
+        root.destroy()
+    except:
+        pass
+
+# I probably should do the following TO-DO first and after that resuming the position calculation in get_grid_position()
+# TODO: Implement a GameIni class or something in that order
+#  This class has all the important values and getter methods
+#  That way I do not need to use global vars and also the method-calls get way shorter and easier to read
+#  It also solves the problem of the current easy missing access to the several options that could be possible
+
 # TODO: implement mouse support
-# TODO: implement an explanation window for users (tkinter)
+
 # TODO: implement a pre-game phase (in which the user can choose cells that are live)
+# TODO: implement a start button
+# TODO: implement a reset-function -> leads to pre-game phase
 # TODO: implement a pause-function
-# TODO: implement a reset-function
-# TODO: implement a way to let the user activate the predefined functions
+
+# TODO: implement a way to let the user activate the predefined functions (fully implement the hotkeys)
+
+# TODO: implement a way to call the redraw and (maybe) game logic function as often as now BUT handle inputs way more
+#  frequent (moving the windows, pressing on x (quit)) for more fluid feeling inputs
 def main():
     global running
     pygame.init()
@@ -243,12 +338,16 @@ def main():
     color_live_cells = (150, 150, 0)
 
     # TODO: remove this test part, after user-input implementation
+    #  Or maybe implement a way to choose these as presets in the pre-phase
     # Still lifes
     activate_still_lifes(my_grid)
     # Oscillators
     activate_oscillators(my_grid)
 
     redraw_window(window, screen_size, rows, columns, my_grid, color_window, color_lines, color_live_cells)
+
+    # Not sure if I should use tkinter or try it with pygame!
+    welcome_window()
 
     running = True
     while running:
