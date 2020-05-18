@@ -24,6 +24,7 @@ class GameInitialization(object):
     color_lines = (60, 60, 60)
     color_live_cells = (150, 150, 0)
 
+    running = False
     # TODO: Think about more UI-related functions
     #  Do I want a generation counter, live and dead cell counter? etc...
 
@@ -346,11 +347,7 @@ def welcome_window():
         pass
 
 # I probably should do the following TO-DO first and after that resuming the position calculation in get_grid_position()
-# TODO: Implement a GameIni class or something in that order
-#  This class has all the important values and getter methods
-#  That way I do not need to use global vars and also the method-calls get way shorter and easier to read
-#  It also solves the problem of the current easy missing access to the several options that could be possible
-
+# -> see the TO-DO in line 381 (above the running var and the main while loop)
 # TODO: implement mouse support
 
 # TODO: implement a pre-game phase (in which the user can choose cells that are live)
@@ -363,7 +360,6 @@ def welcome_window():
 # TODO: implement a way to call the redraw and (maybe) game logic function as often as now BUT handle inputs way more
 #  frequent (moving the windows, pressing on x (quit)) for more fluid feeling inputs
 def main():
-    global running
     pygame.init()
     game_init = GameInitialization()
 
@@ -381,6 +377,21 @@ def main():
 
     # Not sure if I should use tkinter or try it with pygame!
     welcome_window()
+
+    # TODO: Think about how I want my game to run
+    #  Should I let the game_init have the window and mygrid vars?
+    #  Should the boolean running only be set to true if the user presses 'start'
+    #       and in this main there is an entirely different loop that is only here as long as the user
+    #       starts the program and until he closes it
+    # e.g.
+    # programm start -> main()
+    #   ->program_running = True -> loop // not sure about the name though
+    #       now the user can set the status of the cells...
+    # spacebar => game_started = True -> loop
+    #       (this loop does what now happens after the first welcome window)
+    #       pausing the game just temporarily stopps game_started (or maybe even goes into a function in which
+    #       another loop resides, but loops in loops in loops should be bad practice ...)
+    # redraw is in program_running and check_rules is in game_started (?)
 
     running = True
     while running:
