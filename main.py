@@ -3,6 +3,32 @@ import tkinter
 from tkinter import messagebox
 
 
+class GameInitialization(object):
+    # TODO: research if getter and setters are a thing in python
+    #  and how to properly achieve it if it is a thing
+    width = 800
+    height = width
+    screen_size = (width, height)
+
+    rows = 50
+    columns = rows
+
+    size_between_rows = screen_size[0] // rows
+    size_between_columns = screen_size[1] // columns
+
+    color_window = (100, 100, 100)
+    color_lines = (60, 60, 60)
+    color_live_cells = (150, 150, 0)
+
+    # TODO: Think about more UI-related functions
+    #  Do I want a generation counter, live and dead cell counter? etc...
+
+    # TODO: research if a __init__() should always be present in a class
+    # TODO: think about if a init is useful or not
+    def __init__(self):
+        pass
+
+
 class Cell(object):
     def __init__(self, position):
         self.position = position
@@ -300,6 +326,8 @@ def welcome_window():
     messagebox.showinfo(subject, content)
     try:
         root.destroy()
+    # TODO: Find out which exceptions could occur here and further
+    #  specify them, so that this try_except clause is not too broad
     except:
         pass
 
