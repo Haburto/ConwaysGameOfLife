@@ -27,6 +27,21 @@ class GameInitialization(object):
     game_started = False
     exit_program = False
     reset_initiated = False
+
+    mouse_button_pressed = False
+    set_cell_status_live = True
+
+    # TODO: Check if that is the right approach
+    #  It does look and feel so wrong though
+    def set_window(self, window):
+        self.window = window
+
+    def set_my_grid(self, my_grid):
+        self.my_grid = my_grid
+
+    def set_cell_at_new_mouse_position(self, cell):
+        self.cell_at_new_mouse_position = cell
+
     # TODO: Think about more UI-related functions
     #  Do I want a generation counter, live and dead cell counter? etc...
 
@@ -75,22 +90,34 @@ class Grid(object):
     def get_live_cells_set(self):
         return self.live_cells
 
-    def get_neighbours(self, cell):
+    def get_neighbours(self, game_init, cell):
         position = cell.position
         neighbours = set()
-        neighbours.update([
-            self.grid[position[1]-1][position[0]-1],  # top - left
-            self.grid[position[1]-1][position[0]],  # top - center
-            self.grid[position[1]-1][position[0]+1],  # top - right
 
-            self.grid[position[1]][position[0]-1],  # middle - left
-            self.grid[position[1]][position[0]+1],  # middle - right
+        for y_modifier in range(-1, 2):
+            for x_modifier in range(-1, 2):
+                if self.is_neighbour_possible(game_init, cell, x_modifier, y_modifier):
+                    neighbours.add(
+                        self.grid[position[1] + y_modifier][position[0] + x_modifier]
+                    )
 
-            self.grid[position[1]+1][position[0]-1],  # bottom - left
-            self.grid[position[1]+1][position[0]],  # bottom - center
-            self.grid[position[1]+1][position[0]+1],  # bottom - right
-        ])
         return neighbours
+
+    def is_neighbour_possible(self, game_init, cell, x_modifier, y_modifier):
+        position = cell.position
+        # X
+        if position[0] + x_modifier > game_init.rows - 1:
+            return False
+        if position[0] + x_modifier < 0:
+            return False
+
+        # Y
+        if position[1] + y_modifier > game_init.rows - 1:
+            return False
+        if position[1] + y_modifier < 0:
+            return False
+
+        return True
 
     def check_neighbours_status(self, neighbours):
         live_counter = 0
@@ -100,6 +127,7 @@ class Grid(object):
             else:
                 self.cells_touched_by_life.append(neighbour)
         return live_counter
+
 
     def check_survival(self, live_counter):
         if live_counter == 2 or live_counter == 3:
@@ -124,9 +152,9 @@ class Grid(object):
         self.cells_to_be_born.clear()
         self.cells_about_to_die.clear()
 
-    def check_rules(self):
+    def check_rules(self, game_init):
         for cell in self.live_cells:
-            neighbours = self.get_neighbours(cell)
+            neighbours = self.get_neighbours(game_init, cell)
             live_counter = self.check_neighbours_status(neighbours)
             if not self.check_survival(live_counter):
                 self.cells_about_to_die.add(cell)
@@ -198,16 +226,33 @@ def draw_grid(window, game_init):
                          (column * size_between_columns, 0),
                          (column * size_between_columns, screen_size[1]))
 
-# TODO: replace the placeholders
-def get_grid_position(mouse_pos):
-    position = set()
-    size_between_rows_PLACEHOLDER = 5
-    size_between_columns_PLACEHOLDER = 5
-    position[0] = mouse_pos[0] // size_between_columns_PLACEHOLDER
-    position[1] = mouse_pos[1] // size_between_rows_PLACEHOLDER
 
+def get_grid_position(game_init, mouse_pos):
+    position = [0, 0]
+    corrected_mouse_pos = list()
+    # TODO: Remove this correction as it is not actually needed
+    # If the mouse is held and dragged over the border
+    # X
+    if mouse_pos[0] < 0:
+        corrected_mouse_pos.append(0)
+    elif mouse_pos[0] > game_init.width:
+        corrected_mouse_pos.append(game_init.width)
+    else:
+        corrected_mouse_pos.append(mouse_pos[0])
+    # Y
+    if mouse_pos[1] < 0:
+        corrected_mouse_pos.append(0)
+    elif mouse_pos[1] > game_init.width:
+        corrected_mouse_pos.append(game_init.height)
+    else:
+        corrected_mouse_pos.append(mouse_pos[1])
 
-    print("position is:", position)
+    # Actual pixel position to grid position calculation
+    position[0] = corrected_mouse_pos[0] // game_init.size_between_rows
+    position[1] = corrected_mouse_pos[1] // game_init.size_between_columns
+
+    return tuple(position)
+
 
 # While in running pygame one of the 4 pygame.even.X functions HAS to be called
 # Else the OS will think that the game has crashed
@@ -224,35 +269,59 @@ def event_handler(game_init):
         if keys[pygame.K_r]:
             game_init.reset_initiated = True
             game_init.game_started = False
+            game_init.mouse_button_pressed = False
             break
 
         elif keys[pygame.K_SPACE]:
+            # TODO: Test this with 'not' instead of '^='
+            #  That should be a better Python style I guess
             game_init.game_started ^= True
-        # TODO: Use the mouse and click on cells to set them live
-        # TODO: Maybe implement a cell deletion on MOUSE-2 rather than clicking them again
-#         in event_handler()
-#         in for ...event.get()
-#         event < Event(5 - MouseButtonDown
-#         {'pos': (267, 277), 'button': 1, 'window': None}) >
-#         in for ...event.get()
-#         event < Event(6 - MouseButtonUp
-#         {'pos': (267, 277), 'button': 1, 'window': None}) >
-#         in for ...event.get()
-#         event < Event(4 - MouseMotion
-#         {'pos': (342, 295), 'rel': (75, 18), 'buttons': (0, 0, 0), 'window': None}) >
-#         in event_handler()
-        # TODO: Mousbutton-UP probably has to follow mbtn-DOWN, find a way to achieve this later on
+            game_init.mouse_button_pressed = False
+
+        # TODO: careful, sometimes when I often clicked with the mouse, the next spacebar input was not read
+        #  If the time between the click and the spacebar was too small
+
         if not game_init.game_started:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                print("BUTTON DOWN ------------------------------------------")
-                # Convert pos into corresponding cell
-                # This cell will be set alive
-                # Do this until "MOUSEBUTTONUP"
-                # So players can click single cells, or 'drawn' multiple cells to set them live
             if event.type == pygame.MOUSEBUTTONUP:
-                print("BUTTON UP --------------------------------------------")
+                game_init.mouse_button_pressed = False
+                # I think I do not have to, but should I reset the other flags when mouse_button goes up ?
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                grid_position = get_grid_position(game_init, event.dict["pos"])
+                game_init.mouse_button_pressed = True
+                process_cell_conversion(game_init, grid_position, True)
+
+            if event.type == pygame.MOUSEMOTION and game_init.mouse_button_pressed:
+                grid_position = get_grid_position(game_init, event.dict["pos"])
+                process_cell_conversion(game_init, grid_position, False)
 
 
+# TODO: I probably should think about which functions I want to be methods and vice versa
+def process_cell_conversion(game_init, grid_position, mouse_button_down):
+    if not game_init.mouse_button_pressed:
+        print("ERROR: process_cell_conversion() called without 'mouse_button_pressed' flag begin true")
+        return
+
+    grid = game_init.my_grid.grid
+    cell = grid[grid_position[1]][grid_position[0]]
+
+    if mouse_button_down:
+        game_init.set_cell_status_live = not cell.live
+        game_init.set_cell_at_new_mouse_position(cell)
+    else:
+        # Check if the pixel-position is still inside the clicked cell
+        if game_init.cell_at_new_mouse_position == cell:
+            return
+        else:
+            game_init.set_cell_at_new_mouse_position(cell)
+
+    # Compare cell status
+    # Change if needed
+    if game_init.set_cell_status_live:
+        if not cell.live:
+            game_init.my_grid.set_cell_live(cell.position)
+    else:
+        if cell.live:
+            game_init.my_grid.set_cell_dead(cell.position)
 
 
 def redraw_window(window, my_grid, game_init):
@@ -349,22 +418,16 @@ def welcome_window():
     except:
         pass
 
-# I probably should do the following TO-DO first and after that resuming the position calculation in get_grid_position()
-# -> see the TO-DO in line 381 (above the running var and the main while loop)
-# TODO: implement mouse support
 
-# TODO: implement a pre-game phase (in which the user can choose cells that are live)
-
-# TODO: implement a way to let the user activate the predefined functions (fully implement the hotkeys)
-
-# TODO: implement a way to call the redraw and (maybe) game logic function as often as now BUT handle inputs way more
-#  frequent (moving the windows, pressing on x (quit)) for more fluid feeling inputs
 def main():
     pygame.init()
     game_init = GameInitialization()
 
+    # TODO: Check if this is the right approach
     window = pygame.display.set_mode(game_init.screen_size)
+    game_init.set_window(window)
     my_grid = Grid(game_init.axis_length)
+    game_init.set_my_grid(my_grid)
 
     # TODO: remove this test part, after user-input implementation
     #  Or maybe implement a way to choose these as presets in the pre-phase
@@ -372,19 +435,23 @@ def main():
     activate_still_lifes(my_grid)
     # Oscillators
     activate_oscillators(my_grid)
+    # Corner test
+    my_grid.set_cell_live((0, 0))
+    my_grid.set_cell_live((game_init.columns - 1, 0))
+    my_grid.set_cell_live((0, game_init.rows - 1))
+    my_grid.set_cell_live((game_init.columns - 1, game_init.rows - 1))
 
     redraw_window(window, my_grid, game_init)
 
     # Not sure if I should use tkinter or try it with pygame!
     welcome_window()
 
-    # TODO: Should I let the game_init have the window and my_grid vars?
     loop_counter = 0
 
     # TODO: Maybe add the program_response_time and cell_activity_delay_factor to game_init
     #  Also maybe change that ridiculous long names to something shorter
-    program_response_time = 50
-    cell_activity_delay_factor = 10
+    program_response_time = 5
+    cell_activity_delay_factor = 100
 
     while not game_init.exit_program:
         # If pygame.time.wait(x) is not accurate enough, try pygame.time.delay(x)
@@ -395,7 +462,7 @@ def main():
             loop_counter = loop_counter + 1
             if loop_counter == cell_activity_delay_factor:
                 loop_counter = 0
-                my_grid.check_rules()
+                my_grid.check_rules(game_init)
 
         if game_init.reset_initiated:
             game_init.reset_initiated = False
@@ -405,8 +472,6 @@ def main():
             continue
 
         redraw_window(window, my_grid, game_init)
-
-
 
     pygame.quit()
     exit()
