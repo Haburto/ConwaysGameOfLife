@@ -24,7 +24,9 @@ class GameInitialization(object):
     color_lines = (60, 60, 60)
     color_live_cells = (150, 150, 0)
 
-    running = False
+    game_started = False
+    exit_program = False
+    reset_initiated = False
     # TODO: Think about more UI-related functions
     #  Do I want a generation counter, live and dead cell counter? etc...
 
@@ -201,12 +203,11 @@ def get_grid_position(mouse_pos):
 # While in running pygame one of the 4 pygame.even.X functions HAS to be called
 # Else the OS will think that the game has crashed
 # You should also implement the QUIT event first, so that you can comfortably quit the project
-def event_handler():
-    global running
-    print("in event_handler()")
+def event_handler(game_init):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            game_init.game_started = False
+            game_init.exit_program = True
             break
         # TODO: Test if keys has to be outside of the for loop
         keys = pygame.key.get_pressed()
@@ -232,23 +233,18 @@ def event_handler():
         if event.type == pygame.MOUSEBUTTONDOWN:
             print("BUTTON UP --------------------------------------------")
 
-
-
-        # in for ...event.get()
-        # event < Event(2 - KeyDown
-        # {'unicode': 'r', 'key': 114, 'mod': 0, 'scancode': 19, 'window': None}) >
-        # TODO: Press 'spacebar' to start the simulation
-        elif keys[pygame.K_SPACE]:
-            print("implement key 'space' to start the game")
-            pass
-        # TODO: Press 'p' to pause the game
-        elif keys[pygame.K_p]:
-            print("implement key 'p' to pause")
-            pass
-        # TODO: Press 'r' to reset the game and open this window once again
         elif keys[pygame.K_r]:
             print("implement key 'r' to reset the game")
-            pass
+            game_init.reset_initiated = True
+            game_init.game_started = False
+            break
+
+        elif keys[pygame.K_SPACE]:
+            game_init.game_started ^= True
+        # TODO: Press 'r' to reset the game and open this window once again
+
+
+
 
 
 def redraw_window(window, my_grid, game_init):
@@ -332,8 +328,7 @@ def welcome_window():
               "\n\n" \
               "Hotkeys:" \
               "\nUse the mouse and click on cells to set them live" \
-              "\nPress 'spacebar' to start the simulation" \
-              "\nPress 'p' to pause the game" \
+              "\nPress 'spacebar' to start and pause the simulation" \
               "\nPress 'r' to reset the game and open this window once again" \
               "\n\n" \
               "Pressing on 'Ok' will start the game!"
@@ -378,28 +373,35 @@ def main():
     # Not sure if I should use tkinter or try it with pygame!
     welcome_window()
 
-    # TODO: Think about how I want my game to run
-    #  Should I let the game_init have the window and mygrid vars?
-    #  Should the boolean running only be set to true if the user presses 'start'
-    #       and in this main there is an entirely different loop that is only here as long as the user
-    #       starts the program and until he closes it
-    # e.g.
-    # programm start -> main()
-    #   ->program_running = True -> loop // not sure about the name though
-    #       now the user can set the status of the cells...
-    # spacebar => game_started = True -> loop
-    #       (this loop does what now happens after the first welcome window)
-    #       pausing the game just temporarily stopps game_started (or maybe even goes into a function in which
-    #       another loop resides, but loops in loops in loops should be bad practice ...)
-    # redraw is in program_running and check_rules is in game_started (?)
+    # TODO: Should I let the game_init have the window and my_grid vars?
+    loop_counter = 0
 
-    running = True
-    while running:
-        # TODO: check for a better alternative for pygame.time.delay(x)
-        pygame.time.delay(500)
-        event_handler()
-        my_grid.check_rules()
+    # TODO: Maybe add the program_response_time and cell_activity_delay_factor to game_init
+    #  Also maybe change that ridiculous long names to something shorter
+    program_response_time = 50
+    cell_activity_delay_factor = 10
+
+    while not game_init.exit_program:
+        # If pygame.time.wait(x) is not accurate enough, try pygame.time.delay(x)
+        pygame.time.wait(program_response_time)
+        event_handler(game_init)
+
+        if game_init.game_started:
+            loop_counter = loop_counter + 1
+            if loop_counter == cell_activity_delay_factor:
+                loop_counter = 0
+                my_grid.check_rules()
+
+        if game_init.reset_initiated:
+            game_init.reset_initiated = False
+            # TODO: call reset function
+            redraw_window(window, my_grid, game_init)
+            welcome_window()
+            continue
+
         redraw_window(window, my_grid, game_init)
+
+
 
     pygame.quit()
     exit()
