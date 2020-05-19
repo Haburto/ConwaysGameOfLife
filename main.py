@@ -134,6 +134,15 @@ class Grid(object):
         self.check_reproduction()
         self.manage_live_and_dead_cells()
 
+    def reset_game(self):
+        current_live_cells = self.live_cells.copy()
+        for cell in current_live_cells:
+            self.set_cell_dead(cell.position)
+
+        self.cells_touched_by_life = list()
+        self.cells_to_be_born = set()
+        self.cells_about_to_die = set()
+
 
 def draw_live_cells(window, my_grid, game_init):
     color_live_cells = game_init.color_live_cells
@@ -211,6 +220,14 @@ def event_handler(game_init):
             break
         # TODO: Test if keys has to be outside of the for loop
         keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_r]:
+            game_init.reset_initiated = True
+            game_init.game_started = False
+            break
+
+        elif keys[pygame.K_SPACE]:
+            game_init.game_started ^= True
         # TODO: Use the mouse and click on cells to set them live
         # TODO: Maybe implement a cell deletion on MOUSE-2 rather than clicking them again
 #         in event_handler()
@@ -224,25 +241,16 @@ def event_handler(game_init):
 #         event < Event(4 - MouseMotion
 #         {'pos': (342, 295), 'rel': (75, 18), 'buttons': (0, 0, 0), 'window': None}) >
 #         in event_handler()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            print("BUTTON DOWN ------------------------------------------")
-            # Convert pos into corresponding cell
-            # This cell will be set alive
-            # Do this until "MOUSEBUTTONUP"
-            # So players can click single cells, or 'drawn' multiple cells to set them live
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            print("BUTTON UP --------------------------------------------")
-
-        elif keys[pygame.K_r]:
-            print("implement key 'r' to reset the game")
-            game_init.reset_initiated = True
-            game_init.game_started = False
-            break
-
-        elif keys[pygame.K_SPACE]:
-            game_init.game_started ^= True
-        # TODO: Press 'r' to reset the game and open this window once again
-
+        # TODO: Mousbutton-UP probably has to follow mbtn-DOWN, find a way to achieve this later on
+        if not game_init.game_started:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                print("BUTTON DOWN ------------------------------------------")
+                # Convert pos into corresponding cell
+                # This cell will be set alive
+                # Do this until "MOUSEBUTTONUP"
+                # So players can click single cells, or 'drawn' multiple cells to set them live
+            if event.type == pygame.MOUSEBUTTONUP:
+                print("BUTTON UP --------------------------------------------")
 
 
 
@@ -346,9 +354,6 @@ def welcome_window():
 # TODO: implement mouse support
 
 # TODO: implement a pre-game phase (in which the user can choose cells that are live)
-# TODO: implement a start button
-# TODO: implement a reset-function -> leads to pre-game phase
-# TODO: implement a pause-function
 
 # TODO: implement a way to let the user activate the predefined functions (fully implement the hotkeys)
 
@@ -394,7 +399,7 @@ def main():
 
         if game_init.reset_initiated:
             game_init.reset_initiated = False
-            # TODO: call reset function
+            my_grid.reset_game()
             redraw_window(window, my_grid, game_init)
             welcome_window()
             continue
