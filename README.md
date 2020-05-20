@@ -126,7 +126,7 @@ class MyClass(objecet):
 ```
 So just create your class without the getter and setters and if you feel the need to make use of them or even leave out some variables (for example a Money class used to use euroes and cents but now switches to only use cents and calculate the euro value) you can use those two ways to get the functionality without breaking or rewriting the code.
 
-## def __init__(self): ...
+## 2. ```def __init__(self): ...```
 I wondered wether or not a __init__ should be always present or not. The answer is no. If it is not needed, then you can leave it out. I should have known that, because of the guidlines number 1 and 3 in the zen of python!
 ```python
 import this
