@@ -7,8 +7,6 @@ from tkinter import messagebox
 # That some of my function calls have had
 # It also helps me to only have one part of the code that I need to change for options like colour and size
 class GameInitialization(object):
-    # TODO: research if getter and setters are a thing in python
-    #  and how to properly achieve it if it is a thing
     width = 800
     height = width
     screen_size = (width, height)
@@ -44,11 +42,6 @@ class GameInitialization(object):
 
     # TODO: Think about more UI-related functions
     #  Do I want a generation counter, live and dead cell counter? etc...
-
-    # TODO: research if a __init__() should always be present in a class
-    # TODO: think about if a init is useful or not
-    def __init__(self):
-        pass
 
 
 class Cell(object):
@@ -388,6 +381,7 @@ def activate_oscillators(my_grid):
     my_grid.set_cell_live((43, 32))
 
 
+# TODO: center this window on the actual pygame-window
 def welcome_window():
     root = tkinter.Tk()
     root.attributes("-topmost", True)
@@ -420,6 +414,7 @@ def welcome_window():
 
 
 def main():
+    # TODO: center the pygame window on screen when it starts
     pygame.init()
     game_init = GameInitialization()
 
