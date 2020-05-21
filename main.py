@@ -89,12 +89,16 @@ class Grid(object):
 
         for y_modifier in range(-1, 2):
             for x_modifier in range(-1, 2):
+                if x_modifier == 0 and y_modifier == 0:
+                    continue
+
                 if self.is_neighbour_possible(game_init, cell, x_modifier, y_modifier):
                     neighbours.add(
                         self.grid[position[1] + y_modifier][position[0] + x_modifier]
                     )
 
         return neighbours
+
 
     def is_neighbour_possible(self, game_init, cell, x_modifier, y_modifier):
         position = cell.position
@@ -435,6 +439,11 @@ def main():
     my_grid.set_cell_live((game_init.columns - 1, 0))
     my_grid.set_cell_live((0, game_init.rows - 1))
     my_grid.set_cell_live((game_init.columns - 1, game_init.rows - 1))
+
+    my_grid.set_cell_live((5, 5))
+    my_grid.set_cell_live((5, 6))
+    my_grid.set_cell_live((6, 5))
+    my_grid.set_cell_live((6, 6))
 
     redraw_window(window, my_grid, game_init)
 
